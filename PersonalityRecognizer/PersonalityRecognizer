@@ -1,13 +1,13 @@
-#! /bin/bash -
+#!/bin/bash --
 
 # ENVIRONMENT VARIABLES
  
-JDK_PATH=../../apps/jdk1.5.0_05
-WEKA=../../apps/weka-3-4/weka.jar
+JDK_PATH=/usr/lib/jvm/java-8-openjdk
+WEKA=/usr/share/java/weka/weka.jar
 
 # ----------------------------------
 
-COMMONS_CLI=./lib/commons-cli-1.0.jar
+COMMONS_CLI=/usr/share/java/java-commons-cli/commons-cli.jar
 MRC=./lib/jmrc.jar
 
 LIBS=.:$WEKA:$COMMONS_CLI:$MRC:bin/
