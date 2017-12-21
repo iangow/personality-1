@@ -5,14 +5,15 @@
 JDK_PATH=/usr/lib/jvm/java-8-openjdk
 COMMONS_CLI=/usr/share/java/java-commons-cli/commons-cli.jar
 WEKA=/usr/share/java/weka/weka.jar
+MRC=./lib/jmrc.jar
 
 # ---------------------
 
-LIBS=.:$WEKA:$COMMONS_CLI:bin/
+LIBS=.:$WEKA:$COMMONS_CLI:$MRC:bin/
 
 rm bin/recognizer/*.class;
 
-$JDK_PATH/bin/javac  -classpath $LIBS src/recognizer/PersonalityRecognizer.java src/recognizer/Utils.java -d bin/
+$JDK_PATH/bin/javac  -classpath $LIBS src/recognizer/PersonalityRecognizer.java src/recognizer/Utils.java src/recognizer/LIWCDictionary.java -d bin/
 
 
 
