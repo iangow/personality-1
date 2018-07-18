@@ -19,7 +19,7 @@ import sys
 # %%
 
 # This is to keep Insights files intact without creating additional files either
-path = os.getcwd() + '/' + "Insights"
+path = os.path.join(os.getcwd(), "Insights")
 if path not in sys.path:
     sys.path.insert(0, path)
 
@@ -34,7 +34,7 @@ try:
 
     # The first argument should be the directory to look for files
     if len(sys.argv) == 1:
-        print("Usage: watson_pi.py direcotry")
+        print("Usage: watson_pi.py directory")
         sys.exit(1)
     directory = os.path.join(os.getcwd(), sys.argv[1])
     print("Looking for *.txt files in " + directory + "...")
