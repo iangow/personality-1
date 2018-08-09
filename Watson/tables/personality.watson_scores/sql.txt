@@ -1,0 +1,1 @@
+SELECT company_id, executive_id, count(*) AS calls_number, string_agg(speaker_qa, ' ') AS text FROM personality.watson_input GROUP BY company_id, executive_id
