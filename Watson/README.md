@@ -1,92 +1,71 @@
 # Description
 
-`watson_pi.py` reads text files from a directory, submits the texts to
-IBM Watson Personality Insights to obtain the psychological profiles
-corresponding to the texts, and saves them to the files next to the
-text files in the same directory.
+# watson.py
 
-`watson_pi_db.py` queries a PostgreSQL database for a list of subjects
-with texts, and submits these texts to IBM Watson Personality Insights
-to obtain the subjects' psychological profiles. It then uploads the
-obtained profiles to the database to the specified table.
+`watson.py` queries a PostgreSQL database for a list of subjects
+with texts, submits these texts to the IBM Watson Personality Insights
+service to obtain the subjects' psychological profiles, and uploads
+the results to the specified table in the database rewriting it if
+it exists.
 
-# Usage
+The table with texts obtained using the SQL statement (*sql_input*)
+must have column `text`. The texts from this column are submitted
+to the IBM Watson Personality Insights service. All the other columns
+are copied to the output table, which is uploaded back to the database.
+Accordingly, they define the non-score columns of the output table, and
+should contain enough information to identify later the subjects in
+the output table.
 
-The required Python 3 modules are listed in the import section.
+Besides these columns copied from the input data, the output table
+also contains columns with the scores returned by the service.
+Basically, the output table is different from the input table only
+in that the column `text` is substituted by a number of columns
+containing personality characteristics.
 
-Two files containing personal identification information for services
-should be in the same directory as the program:
+## personalityinsights.py
+
+This file contains the main class to submit texts to the IBM Watson
+Personality Insights service.
+
+An example of usage:
+``` Python
+from personalityinsights import PersonalityInsights as PI
+pi = PI()
+profile = pi.get_profile(text)
+```
+
+The class supports caching of results returned by the service.
+The results are cached in the subdirectory `cache/`.
+This is done for two reasons:
+- First, each Watson API call takes about 1 second to complete, so
+  a large number of calls can take a long time to finish. Caching
+  allows to skip those calls that were made previously.
+- Second, the service charges per each API call.
+
+## personalityinsights.example.py
+
+This is an example of usage of `personalityinsights.py`.
+The program takes as an input a directory (`examples` by default)
+and loads all `*.txt` files from it. It then submits the texts
+to the IBM Watson Personality Insights service using the module
+`personalityinsights.py`, and saves the results in `*.json` files
+next to the text files in the same directory.
+
+# Authentication with the database and the IBM Watson Bluemix Cloud
+
+Two files containing personal identification information for
+the services being used by the program should be present:
 
 - `config.py` contains information identifying the user's account
-  set up on IBM Watson website.
+  previously set up on the IBM Watson website.
 
-  Further details can be found in the
-  file `config.example.py` which should be used as a template.
+  Further details can be found in the file `config.example.py`,
+  which should be used as a template.
 
-- `.pgpass` should be present in the same directory as the program
-  (or a link should be used). This is a standard file containing
-  PostgreSQL database connection parameters and credentials.
+- `.pgpass` should be present in the home directory of the user
+  running the program on a *nix OS (including MacOS). Please
+  consult appropriate documentation regarding the correct placement
+  of this file on a Windows machine.
 
-  This file is used only for `watson_pi_db.py`.
-
-One additional file is used by `watson_pi_db.py`:
-
-- `table_sql.ini` contains a number of groups of lines, where each
-  group of lines specifies some parameters used in working with
-  the database.
-
-  Further details can be found in `table_sql.example.ini`, which
-  can be used as an example.
-
-### watson_pi.py
-
-Usage:
-
-```
-watson_pi.py directory
-```
-
-The directory should contain a number of `.txt` files. The obtained
-psychological profiles are stored in the corresponding `.json` files.
-
-### watson_pi_db.py
-
-Usage:
-
-```
-watson_pi_db.py
-```
-
-The program reads a series of parameters from `table_sql.ini` each
-specifying one table to generate in the database. The parameters
-used for one table are described in `table_sql.example.ini`.
-
-The connection to the database is established using the parameters
-from `.pgpass`.
-
-The SQL statement is used to obtain a table where one column has name
-`Text`. This column is used to submit texts to IBM Watson Personality
-Insights. All other columns are copied to the output table that is
-submitted back to the database. The output table consists of these
-other columns, and columns containing all personality characteristics
-returned by the service. Basically, the output table is different from
-the input table returned by the SQL statement only in that the column
-`Text` is substituted by a number of columns containing personality
-characteristics instead. The name of the table, as well as a number of
-its parameters, such as a comment, ownership and access rights, are
-also specified for each table.
-
-# Side effects
-
-`watson_pi_db.py` uses the subfolder `table` of the directory of the
-program to store the results returned by the service. It creates a
-subfolder for each table, stores the SQL statement used to obtain the
-input table, and all `.json` files returned by the service as well as
-the final output table in the `.csv` format. This is done to prevent
-calling IBM Watson Personality Insights API again for those texts for
-which it was already called and results were returned. Not only does
-it saves API calls of the paid per use service, but it also speeds up
-the process enormously when it is rerun after an interruption or an
-error. This does not use much of the disk space, as the results of
-1,000 calls take approximately 14MB.
-
+  Alternatively, the environment variables `PGUSER` and `PGPASSWORD`
+  should be set.
